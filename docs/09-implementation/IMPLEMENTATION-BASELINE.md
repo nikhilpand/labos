@@ -105,13 +105,15 @@ src/
 
 ## 5. Technology Stack Mandate
 
-* **Language:** TypeScript (`strict: true`, `noImplicitAny: true`, `strictNullChecks: true`).
-* **Backend Framework:** NestJS (Modular Monolith architecture per ADR-004).
-* **Database:** PostgreSQL (System of record per ADR-003, relational integrity, ACID transactions).
-* **ORM / Database Layer:** Prisma or Drizzle ORM (type-safe queries, migration management, transactional DDL).
-* **Validation Layer:** Zod or `class-validator` at all HTTP, messaging, and parsing boundaries.
-* **Scientific Math Engine:** Dedicated decimal library (`decimal.js` or `bignumber.js`). **Zero JavaScript floating-point arithmetic on scientific results.**
+* **Language:** TypeScript (`strict: true`, `noImplicitAny: true`, `strictNullChecks: true`, `noUncheckedIndexedAccess: true`).
+* **Backend Framework:** NestJS v11 (Modular Monolith architecture per ADR-004).
+* **Database:** PostgreSQL (System of record per ADR-003, relational integrity, ACID transactions via `pg` Pool).
+* **Test Runner:** Vitest v3 with `@vitest/coverage-v8` (fast native TypeScript/ESM execution, deterministic global PostgreSQL lifecycle).
+* **Validation Layer:** Zod at all HTTP, messaging, and environment configuration boundaries.
+* **Scientific Math Engine:** `decimal.js` configured to 34 decimal places (IEEE 754 decimal128 standard). **Zero JavaScript floating-point arithmetic on scientific results.**
+* **UUID Strategy:** RFC 9562 UUIDv7 via `uuidv7` for monotonic time-ordered indexing.
 * **Identity:** Standards-based OpenID Connect (OIDC) / OAuth2 with Keycloak (local dev) and enterprise IdPs (ADR-006).
+* **Local Test Database:** `embedded-postgres` launching a genuine PostgreSQL 18.4 engine on localhost for real transactional integration testing without Docker requirements.
 
 ---
 

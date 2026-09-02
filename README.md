@@ -106,19 +106,55 @@ To explore the design and specifications, consult the following key entry points
 
 ---
 
-## 8. Safety & Compliance Disclaimer
+## 8. Quickstart & Foundation Verification
+
+LabOS backend foundation is scaffolded with strict TypeScript, NestJS, and PostgreSQL.
+
+### Prerequisites
+- Node.js >= 20
+- npm >= 10
+
+### Development Scripts
+
+```bash
+# 1. Type check
+npm run typecheck
+
+# 2. Code linting
+npm run lint
+
+# 3. Format verification
+npm run format:check
+
+# 4. Unit tests
+npm run test
+
+# 5. Integration tests (runs against real local PostgreSQL instance)
+npm run test:integration
+
+# 6. Full test suite with code coverage
+npm run test:coverage
+
+# 7. Production build
+npm run build
+```
+
+---
+
+## 9. Safety & Compliance Disclaimer
 
 > [!CAUTION]
 > **DEVELOPMENT & ARCHITECTURE NOTICE:**  
-> LabOS is currently an early-stage software design and development project in **Phase 0**. It is **not** certified, validated, or approved for production laboratory operations, clinical diagnostic use, patient care, pharmaceutical batch release, or formal regulatory filings under ISO/IEC 17025, ISO 15189, CLIA, CAP, or 21 CFR Part 11.
+> LabOS is currently an early-stage software design and development project in **Phase 1 (Foundation Scaffolding)**. It is **not** certified, validated, or approved for production laboratory operations, clinical diagnostic use, patient care, pharmaceutical batch release, or formal regulatory filings under ISO/IEC 17025, ISO 15189, CLIA, CAP, or 21 CFR Part 11.
 > 
 > No claim of standards compliance or production readiness is made or implied at this stage. Any laboratory deploying this software in the future is solely responsible for performing its own formal Computer System Validation (CSV) and method verification in accordance with applicable regional and international regulatory mandates.
 
 ---
 
-## 9. Contribution & Governance Status
+## 10. Contribution & Governance Status
 
-LabOS is currently maintained under strict architectural governance. 
+LabOS is maintained under strict architectural governance. 
 
-* **Rule of Phasing:** Application code, frontend components, and database migrations are blocked until Phase 0 specifications are formally frozen and approved.
+* **Rule of Phasing:** Domain features are built incrementally through approved specifications in `specs/active/` following strict vertical slices.
 * **Invariant Protection:** Changes to core domain entities, calculation rules, or audit invariants require an approved Architecture Decision Record (ADR).
+

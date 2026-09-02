@@ -1,0 +1,135 @@
+# ==============================================================================
+# LabOS — Git Ignore Rules
+# ==============================================================================
+# Covers: Current Documentation Phase & Planned TypeScript / NestJS / PostgreSQL
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Dependencies & Package Managers
+# ------------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-store/
+
+# ------------------------------------------------------------------------------
+# Environment Variables & Secrets (NEVER COMMIT)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Explicitly ensure configuration templates are NEVER ignored
+!.env.example
+!.env.template
+
+# Credentials, Keys, and Certificates
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+*.pkcs12
+*.asc
+secrets/
+credentials/
+id_rsa
+id_ed25519
+
+# ------------------------------------------------------------------------------
+# Build Outputs & Compilation Artifacts
+# ------------------------------------------------------------------------------
+dist/
+build/
+out/
+bin/
+obj/
+*.tsbuildinfo
+.tsbuildinfo
+
+# ------------------------------------------------------------------------------
+# Testing & Code Coverage
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+junit.xml
+
+# ------------------------------------------------------------------------------
+# Runtime Logs & Process Artifacts
+# ------------------------------------------------------------------------------
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ------------------------------------------------------------------------------
+# Local Databases & Storage Artifacts
+# ------------------------------------------------------------------------------
+# Local SQLite, persistent volume dumps, and database data directories
+*.db
+*.sqlite
+*.sqlite3
+*.sql.dump
+*.dump
+*.tar.gz
+pgdata/
+data/
+storage/uploads/
+storage/reports/
+storage/temp/
+
+# Explicitly preserve versioned migrations and seed templates
+!prisma/migrations/
+!migrations/
+!src/database/migrations/
+
+# ------------------------------------------------------------------------------
+# Operating System & Filesystem Junk
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# ------------------------------------------------------------------------------
+# IDEs & Editor Configuration
+# ------------------------------------------------------------------------------
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+*.bak
+
+# VS Code - Ignore local user state, but allow shared config if created later
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ------------------------------------------------------------------------------
+# Cache & Temporary Files
+# ------------------------------------------------------------------------------
+.cache/
+.tmp/
+tmp/
+temp/
+*.tmp
+*.temp

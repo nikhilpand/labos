@@ -85,6 +85,7 @@ pids/
 *.tar.gz
 pgdata/
 data/
+.test-pg-cluster/
 storage/uploads/
 storage/reports/
 storage/temp/
@@ -93,6 +94,7 @@ storage/temp/
 !prisma/migrations/
 !migrations/
 !src/database/migrations/
+!src/core/database/migrations/
 
 # ------------------------------------------------------------------------------
 # Operating System & Filesystem Junk

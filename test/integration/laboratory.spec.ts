@@ -64,8 +64,8 @@ describe('Laboratory Platform Context (Integration)', () => {
 
   it('throws NotFoundProblem when querying a non-existent laboratory', async () => {
     const nonExistentId = '01918000-0000-7000-8000-999999999999';
-    await expect(
-      laboratoryService.ensureActiveLaboratory(nonExistentId),
-    ).rejects.toThrow(NotFoundProblem);
+    await expect(laboratoryService.ensureActiveLaboratory(nonExistentId)).rejects.toThrow(
+      NotFoundProblem,
+    );
   });
 });

@@ -18,14 +18,15 @@ describe('canonicalJson', () => {
       action: 'UPDATE',
       user: { age: 30, name: 'Alice' },
     };
-    expect(canonicalJson(nested1)).toBe(
-      '{"action":"UPDATE","user":{"age":30,"name":"Alice"}}',
-    );
+    expect(canonicalJson(nested1)).toBe('{"action":"UPDATE","user":{"age":30,"name":"Alice"}}');
     expect(canonicalJson(nested1)).toBe(canonicalJson(nested2));
   });
 
   it('preserves array element ordering while canonically formatting inner elements', () => {
-    const arr = [{ b: 1, a: 2 }, { d: 4, c: 3 }];
+    const arr = [
+      { b: 1, a: 2 },
+      { d: 4, c: 3 },
+    ];
     expect(canonicalJson(arr)).toBe('[{"a":2,"b":1},{"c":3,"d":4}]');
   });
 

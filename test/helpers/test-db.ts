@@ -45,10 +45,10 @@ export async function ensureMigrations(dbUrl: string): Promise<void> {
       await client.query('BEGIN;');
       try {
         await client.query(sql);
-        await client.query(
-          'INSERT INTO schema_migrations (name, checksum) VALUES ($1, $2);',
-          [file, checksum],
-        );
+        await client.query('INSERT INTO schema_migrations (name, checksum) VALUES ($1, $2);', [
+          file,
+          checksum,
+        ]);
         await client.query('COMMIT;');
       } catch (err) {
         await client.query('ROLLBACK;');
@@ -73,4 +73,3 @@ export async function startTestDatabase(): Promise<string> {
 export async function stopTestDatabase(): Promise<void> {
   // Global teardown handles stopping the cluster
 }
-

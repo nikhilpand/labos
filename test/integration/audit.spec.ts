@@ -46,13 +46,7 @@ describe('Audit Ledger & Immutability (Integration)', () => {
       `INSERT INTO users (user_id, laboratory_id, oidc_subject_id, email, full_name, status)
        VALUES ($1, $2, $3, $4, $5, 'ACTIVE')
        ON CONFLICT (oidc_subject_id) DO NOTHING;`,
-      [
-        TEST_ACTOR_ID,
-        DEFAULT_LAB_ID,
-        TEST_OIDC_SUB,
-        'actor.test@apexlabs.com',
-        'Audit Test Actor',
-      ],
+      [TEST_ACTOR_ID, DEFAULT_LAB_ID, TEST_OIDC_SUB, 'actor.test@apexlabs.com', 'Audit Test Actor'],
     );
   }, 45000);
 
@@ -150,17 +144,14 @@ describe('Audit Ledger & Immutability (Integration)', () => {
 
     // 2. Attempt direct SQL UPDATE on the audit event
     await expect(
-      db.query(
-        `UPDATE audit_events SET action = 'TAMPERED' WHERE audit_event_id = $1;`,
-        [event.auditEventId],
-      ),
+      db.query(`UPDATE audit_events SET action = 'TAMPERED' WHERE audit_event_id = $1;`, [
+        event.auditEventId,
+      ]),
     ).rejects.toThrow(/Audit Invariant Violation.*prohibited/i);
 
     // 3. Attempt direct SQL DELETE on the audit event
     await expect(
-      db.query(`DELETE FROM audit_events WHERE audit_event_id = $1;`, [
-        event.auditEventId,
-      ]),
+      db.query(`DELETE FROM audit_events WHERE audit_event_id = $1;`, [event.auditEventId]),
     ).rejects.toThrow(/Audit Invariant Violation.*prohibited/i);
   });
 
@@ -172,12 +163,20 @@ describe('Audit Ledger & Immutability (Integration)', () => {
   });
 
   it('safely handles concurrent audit appends without breaking the hash chain', async () => {
+    const concurrentLabId = generateUuidV7();
+    await db.query(
+      `INSERT INTO laboratories (laboratory_id, organization_id, name, accreditation_number, accreditation_body, status)
+       VALUES ($1, '01918000-0000-7000-8000-000000000000', 'Concurrent Test Lab', 'TEST-CONC', 'A2LA', 'ACTIVE')
+       ON CONFLICT (laboratory_id) DO NOTHING;`,
+      [concurrentLabId],
+    );
+
     const concurrency = 5;
     const promises = Array.from({ length: concurrency }).map((_, index) =>
       db.transaction(async (tx) => {
         return auditService.appendEvent(
           {
-            laboratoryId: DEFAULT_LAB_ID,
+            laboratoryId: concurrentLabId,
             actorUserId: TEST_ACTOR_ID,
             action: 'CONCURRENT_TEST',
             entityType: 'Sample',
@@ -200,7 +199,7 @@ describe('Audit Ledger & Immutability (Integration)', () => {
     }
 
     // Verify unbroken chain across all events
-    const verification = await verifierService.verifyChain(DEFAULT_LAB_ID);
+    const verification = await verifierService.verifyChain(concurrentLabId);
     expect(verification.isContinuous).toBe(true);
   });
 });

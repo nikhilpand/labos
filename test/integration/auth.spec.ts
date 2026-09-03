@@ -98,9 +98,7 @@ describe('Auth & Permission Resolution (Integration)', () => {
   });
 
   it('throws UnauthorizedProblem when Authorization header is absent or invalid', async () => {
-    await expect(authService.authenticateHeader(undefined)).rejects.toThrow(
-      UnauthorizedProblem,
-    );
+    await expect(authService.authenticateHeader(undefined)).rejects.toThrow(UnauthorizedProblem);
     await expect(authService.authenticateHeader('Basic invalid-credentials')).rejects.toThrow(
       UnauthorizedProblem,
     );

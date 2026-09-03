@@ -14,7 +14,7 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "test": "vitest run test/unit",
     "test:integration": "vitest run test/integration --fileParallelism=false --testTimeout 60000 --hookTimeout 60000",
-    "test:all": "vitest run",
+    "test:all": "vitest run --fileParallelism=false --testTimeout 60000 --hookTimeout 60000",
     "test:coverage": "vitest run --coverage",
     "migrate": "node -r ts-node/register src/core/database/cli.ts migrate"
   },

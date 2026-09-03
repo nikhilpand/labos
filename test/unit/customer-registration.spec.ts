@@ -199,9 +199,12 @@ describe('Customer Registration — Unit & Schema Suite', () => {
         'corr-1',
       );
 
-      // Verify that audit event was invoked with actorUserId equal to internal LabOS user_id (NOT oidcSubject)
       expect(mockAuditService.appendEvent).toHaveBeenCalledTimes(1);
-      const auditCall = vi.mocked(mockAuditService.appendEvent).mock.calls[0]![0];
+      const firstCall = vi.mocked(mockAuditService.appendEvent).mock.calls[0];
+      expect(firstCall).toBeDefined();
+      const auditCall = firstCall ? firstCall[0] : null;
+      expect(auditCall).toBeDefined();
+      if (!auditCall) throw new Error('auditCall missing');
 
       expect(auditCall.actorUserId).toBe(mockPrincipal.userId);
       expect(auditCall.actorUserId).not.toBe(mockPrincipal.oidcSubject);

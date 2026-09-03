@@ -195,7 +195,11 @@ describe('Audit Ledger & Immutability (Integration)', () => {
     // Verify all sequence numbers are distinct and sequential
     const seqs = results.map((r) => r.sequenceNumber).sort((a, b) => a - b);
     for (let i = 1; i < seqs.length; i++) {
-      expect(seqs[i]!).toBe(seqs[i - 1]! + 1);
+      const current = seqs[i];
+      const previous = seqs[i - 1];
+      expect(current).toBeDefined();
+      expect(previous).toBeDefined();
+      expect(current).toBe((previous ?? 0) + 1);
     }
 
     // Verify unbroken chain across all events

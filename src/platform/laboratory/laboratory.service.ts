@@ -11,10 +11,7 @@ export class LaboratoryService {
     private readonly repo: LaboratoryRepository,
   ) {}
 
-  async getLaboratory(
-    laboratoryId: string,
-    context?: TransactionalContext,
-  ): Promise<Laboratory> {
+  async getLaboratory(laboratoryId: string, context?: TransactionalContext): Promise<Laboratory> {
     const lab = await this.repo.findLaboratoryById(laboratoryId, context);
     if (!lab) {
       throw new NotFoundProblem('Laboratory', laboratoryId);

@@ -15,9 +15,7 @@ export class AuthService {
    * Resolves internal User identity, active laboratory, assigned roles,
    * and granular permissions using the external OIDC Subject ID.
    */
-  async resolvePrincipalBySubject(
-    oidcSubjectId: string,
-  ): Promise<AuthenticatedPrincipal | null> {
+  async resolvePrincipalBySubject(oidcSubjectId: string): Promise<AuthenticatedPrincipal | null> {
     const userResult = await this.db.query<{
       user_id: string;
       laboratory_id: string;
@@ -72,9 +70,7 @@ export class AuthService {
    * Validates an incoming Authorization header and returns the authenticated principal.
    * Throws UnauthorizedProblem (401) on missing or invalid credentials.
    */
-  async authenticateHeader(
-    authHeader: string | undefined,
-  ): Promise<AuthenticatedPrincipal> {
+  async authenticateHeader(authHeader: string | undefined): Promise<AuthenticatedPrincipal> {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedProblem(
         'Missing or invalid Authorization header. Expected format: Bearer <token>.',

@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  Inject,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthService } from '../auth.service';
 import { PERMISSIONS_METADATA_KEY } from '../decorators/require-permissions.decorator';
@@ -43,9 +38,7 @@ export class PermissionsGuard implements CanActivate {
 
     // Check granular permissions
     const userPermissions = new Set(principal.permissions);
-    const missingPermissions = requiredPermissions.filter(
-      (perm) => !userPermissions.has(perm),
-    );
+    const missingPermissions = requiredPermissions.filter((perm) => !userPermissions.has(perm));
 
     if (missingPermissions.length > 0) {
       throw new ForbiddenProblem(

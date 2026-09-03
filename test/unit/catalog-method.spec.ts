@@ -249,10 +249,20 @@ describe('Catalog & Versioned Method Unit Tests', () => {
   });
 
   describe('CatalogService: State Machine & Four-Eyes Approval Guards', () => {
+    interface MockCatalogRepo {
+      findMethodById: ReturnType<typeof vi.fn>;
+      findMethodVersionById: ReturnType<typeof vi.fn>;
+      lockMethodVersionForUpdate: ReturnType<typeof vi.fn>;
+      findParametersByVersionId: ReturnType<typeof vi.fn>;
+      findActiveVersionForMethod: ReturnType<typeof vi.fn>;
+      updateMethodVersionStatus: ReturnType<typeof vi.fn>;
+      [key: string]: ReturnType<typeof vi.fn>;
+    }
+
     let service: CatalogService;
     let mockDb: { transaction: ReturnType<typeof vi.fn>; query: ReturnType<typeof vi.fn> };
     let mockAuditService: { appendEvent: ReturnType<typeof vi.fn> };
-    let mockRepo: Record<string, ReturnType<typeof vi.fn>>;
+    let mockRepo: MockCatalogRepo;
 
     const mockPrincipal: AuthenticatedPrincipal = {
       userId: '01918000-0000-7000-8000-000000000021', // Author
@@ -286,6 +296,7 @@ describe('Catalog & Versioned Method Unit Tests', () => {
         insertUnit: vi.fn(),
         findUnits: vi.fn(),
         findUnitById: vi.fn(),
+        findUnitBySymbol: vi.fn(),
         insertSampleType: vi.fn(),
         findSampleTypes: vi.fn(),
         findSampleTypeById: vi.fn(),
@@ -315,9 +326,9 @@ describe('Catalog & Versioned Method Unit Tests', () => {
       };
 
       service = new CatalogService(
-        mockDb as DatabaseService,
-        mockAuditService as AuditService,
-        mockRepo as CatalogRepository,
+        mockDb as unknown as DatabaseService,
+        mockAuditService as unknown as AuditService,
+        mockRepo as unknown as CatalogRepository,
       );
     });
 

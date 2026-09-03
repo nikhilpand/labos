@@ -203,7 +203,7 @@ A task or feature in LabOS is considered **Done** only when:
 
 ## 15. Current Project Phase
 
-- **Current Status:** **Phase 2 — Core V1 Implementation (SPEC-001 Complete & Verified)**
+- **Current Status:** **Phase 2 — Core V1 Implementation (SPEC-001 & SPEC-002 Complete & Verified)**
 - **Approved Architecture Decision Records:**
   - [ADR-001: Primary First Laboratory Domain — ISO/IEC 17025 Analytical & Testing Laboratories](file:///c:/Users/nikhil/Desktop/projects/labos/docs/07-decisions/ADR-001-ISO-17025-FIRST.md)
   - [ADR-002: Backend Technology Stack & Scientific Calculation Rigor — TypeScript with NestJS](file:///c:/Users/nikhil/Desktop/projects/labos/docs/07-decisions/ADR-002-TYPESCRIPT-NESTJS.md)
@@ -213,7 +213,8 @@ A task or feature in LabOS is considered **Done** only when:
   - [ADR-006: Identity, Authentication & Domain Authorization Architecture](file:///c:/Users/nikhil/Desktop/projects/labos/docs/07-decisions/ADR-006-OIDC-IDENTITY.md)
 - **Completed Vertical Slices:**
   - [SPEC-001: Customer Registration with Primary Contact & Audit Trail](file:///c:/Users/nikhil/Desktop/projects/labos/specs/completed/001-first-vertical-slice.md)
+  - [SPEC-002: Laboratory Catalog and Versioned Test Method Foundation](file:///c:/Users/nikhil/Desktop/projects/labos/specs/completed/002-laboratory-catalog.md)
 - **Immediate Focus:** 
   1. Maintain verification gates across all platform layers.
-  2. Scope and specify next vertical slices (Sample Intake & Accessioning).
+  2. Scope and specify next vertical slices (Test Requests and Sample Accessioning).
 - **Constraint Reminder:** Do not begin next vertical slice implementation until specification is approved.

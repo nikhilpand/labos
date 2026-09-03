@@ -4,8 +4,19 @@ import { DatabaseModule } from './core/database/database.module';
 import { HealthModule } from './health/health.module';
 import { CorrelationIdMiddleware } from './core/logging/correlation-id.middleware';
 
+import { LaboratoryModule } from './platform/laboratory/laboratory.module';
+import { AuthModule } from './platform/auth/auth.module';
+import { AuditModule } from './platform/audit/audit.module';
+
 @Module({
-  imports: [ConfigModule, DatabaseModule, HealthModule],
+  imports: [
+    ConfigModule,
+    DatabaseModule,
+    HealthModule,
+    LaboratoryModule,
+    AuthModule,
+    AuditModule,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {

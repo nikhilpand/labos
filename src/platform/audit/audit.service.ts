@@ -85,7 +85,10 @@ export class AuditService {
       );
     }
 
-    const currentHead = headResult.rows[0]!;
+    const currentHead = headResult.rows[0];
+    if (!currentHead) {
+      throw new Error('Failed to retrieve or initialize audit chain head');
+    }
     const previousHash = currentHead.latest_event_hash;
     const nextSequence = parseInt(currentHead.total_events, 10) + 1;
 
@@ -153,7 +156,10 @@ export class AuditService {
       `[Audit] Appended #${nextSequence} [${input.action}] on ${input.entityType}:${input.entityId} (Hash: ${currentHash.substring(0, 8)}...)`,
     );
 
-    const insertedRow = insertResult.rows[0]!;
+    const insertedRow = insertResult.rows[0];
+    if (!insertedRow) {
+      throw new Error('Failed to insert audit event record.');
+    }
     return {
       auditEventId,
       laboratoryId: input.laboratoryId,

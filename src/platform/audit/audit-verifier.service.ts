@@ -42,7 +42,17 @@ export class AuditVerifierService {
       };
     }
 
-    const head = headResult.rows[0]!;
+    const head = headResult.rows[0];
+    if (!head) {
+      return {
+        laboratoryId,
+        isContinuous: false,
+        totalEventsChecked: 0,
+        genesisHash: GENESIS_HASH,
+        latestHash: GENESIS_HASH,
+        reason: 'Audit chain head record could not be read.',
+      };
+    }
     const expectedTotal = parseInt(head.total_events, 10);
 
     // Fetch all events ordered by sequence
@@ -80,7 +90,10 @@ export class AuditVerifierService {
     let expectedPreviousHash = GENESIS_HASH;
 
     for (let i = 0; i < events.length; i++) {
-      const event = events[i]!;
+      const event = events[i];
+      if (!event) {
+        continue;
+      }
       const seq = parseInt(event.sequence_number, 10);
 
       // 1. Verify sequence order

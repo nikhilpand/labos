@@ -402,6 +402,36 @@ describe('Customer Registration Vertical Slice (SPEC-001 Integration)', () => {
     expect(res.body.invalidParams.length).toBeGreaterThan(0);
   });
 
+  it('Customer Deletion Prohibited: foreign key ON DELETE RESTRICT prevents deleting a customer with contacts', async () => {
+    // 1. Register a customer with primary contact
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/customers')
+      .set('Authorization', `Bearer dev-token:${ACCESSIONER_SUB}`)
+      .send({
+        ...validPayload,
+        clientCode: 'CUST-RESTRICT-1',
+      });
+
+    expect(res.status).toBe(201);
+    const customerId = res.body.data.customerId;
+
+    // 2. Direct SQL DELETE on customers table must fail due to ON DELETE RESTRICT foreign key
+    await expect(
+      db.query(`DELETE FROM customers WHERE customer_id = $1;`, [customerId]),
+    ).rejects.toThrow(/violates RESTRICT setting of foreign key constraint/i);
+
+    // 3. Verify customer and contacts remain intact in PostgreSQL
+    const checkCust = await db.query(`SELECT * FROM customers WHERE customer_id = $1;`, [
+      customerId,
+    ]);
+    expect(checkCust.rowCount).toBe(1);
+
+    const checkContact = await db.query(`SELECT * FROM contacts WHERE customer_id = $1;`, [
+      customerId,
+    ]);
+    expect(checkContact.rowCount).toBe(1);
+  });
+
   it('Cryptographic Hash Chain Verification: audit ledger chain remains 100% valid after registrations', async () => {
     const chainVerification = await auditVerifier.verifyChain(DEFAULT_LAB_ID);
 

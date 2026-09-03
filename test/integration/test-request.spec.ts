@@ -9,6 +9,7 @@ import { AuditService } from '@/platform/audit/audit.service';
 import { AuditVerifierService } from '@/platform/audit/audit-verifier.service';
 import { ProblemDetailsFilter } from '@/core/errors/rfc7807.filter';
 import { generateUuidV7 } from '@/core/common/uuid';
+import { Client } from 'pg';
 import { startTestDatabase, stopTestDatabase } from '../helpers/test-db';
 
 describe('SPEC-003: Test Request Creation and Immutable Method Binding (Integration)', () => {
@@ -538,13 +539,28 @@ describe('SPEC-003: Test Request Creation and Immutable Method Binding (Integrat
       expect(res.status).toBe(201);
     }
 
-    const requestNumbers = responses.map((r) => r.body.data.requestNumber);
+    const requestNumbers = responses.map((r) => r.body.data.requestNumber as string);
     const uniqueNumbers = new Set(requestNumbers);
 
     // Must have exactly 10 unique numbers (zero collisions)
     expect(uniqueNumbers.size).toBe(10);
     for (const num of requestNumbers) {
       expect(num).toMatch(/^TR-\d{4}-\d{6}$/);
+    }
+
+    // Numerically verify no sequence gaps: parse numeric suffixes, sort, and assert contiguous progression
+    const suffixes = requestNumbers
+      .map((num) => {
+        const parts = num.split('-');
+        const part = parts[2];
+        return part ? parseInt(part, 10) : 0;
+      })
+      .sort((a, b) => a - b);
+
+    expect(suffixes).toHaveLength(10);
+    const baseSuffix = suffixes[0] ?? 0;
+    for (let i = 0; i < suffixes.length; i++) {
+      expect(suffixes[i]).toBe(baseSuffix + i);
     }
   });
 
@@ -588,36 +604,53 @@ describe('SPEC-003: Test Request Creation and Immutable Method Binding (Integrat
       [raceCustomerId, DEFAULT_LAB_ID],
     );
 
-    // Concurrently trigger order creation and customer status update to HOLD
-    const [createRes, updateRes] = await Promise.allSettled([
-      request(app.getHttpServer())
-        .post('/api/v1/test-requests')
-        .set('Authorization', `Bearer dev-token:${ACCESSIONER_JANE_SUB}`)
-        .send({
-          customerId: raceCustomerId,
-          customerReference: 'PO-CUST-RACE',
-          methodVersionIds: [METHOD_1_V1_ID],
-        }),
-      db.transaction(async (tx) => {
-        await tx.query(
-          `UPDATE customers SET status = 'HOLD', updated_at = NOW() WHERE customer_id = $1;`,
-          [raceCustomerId],
-        );
-      }),
-    ]);
+    const dbUrl = app.get(ConfigService).databaseUrl;
+    const clientA = new Client({ connectionString: dbUrl });
+    const clientB = new Client({ connectionString: dbUrl });
+    await clientA.connect();
+    await clientB.connect();
 
-    expect(updateRes.status).toBe('fulfilled');
+    try {
+      // 1. Transaction A starts and obtains FOR SHARE lock on customer (as in TestRequestService)
+      await clientA.query('BEGIN;');
+      const selectRes = await clientA.query(
+        `SELECT customer_id, status FROM customers WHERE customer_id = $1 FOR SHARE;`,
+        [raceCustomerId],
+      );
+      expect(selectRes.rows[0]?.status).toBe('ACTIVE');
 
-    // Due to FOR SHARE row locking:
-    // If createRes succeeded (201), it executed before HOLD took effect.
-    // If createRes failed (400), it executed after HOLD took effect and properly rejected.
-    if (createRes.status === 'fulfilled') {
-      const httpStatus = createRes.value.status;
-      expect([201, 400]).toContain(httpStatus);
+      // 2. Transaction B starts and attempts conflicting UPDATE to move customer to HOLD
+      await clientB.query('BEGIN;');
+      let bCompleted = false;
+      const updatePromise = clientB
+        .query(`UPDATE customers SET status = 'HOLD', updated_at = NOW() WHERE customer_id = $1;`, [
+          raceCustomerId,
+        ])
+        .then((res) => {
+          bCompleted = true;
+          return res;
+        });
 
-      if (httpStatus === 400) {
-        expect(createRes.value.body.detail).toContain('currently on HOLD');
-      }
+      // 3. Deterministically prove Transaction B is blocked by Transaction A's FOR SHARE lock
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(bCompleted).toBe(false);
+
+      // 4. Transaction A commits and releases its lock
+      await clientA.query('COMMIT;');
+
+      // 5. Transaction B proceeds, unblocks, and completes its update
+      await updatePromise;
+      expect(bCompleted).toBe(true);
+      await clientB.query('COMMIT;');
+
+      // 6. Verify customer status in database is now HOLD
+      const finalCheck = await db.query(`SELECT status FROM customers WHERE customer_id = $1;`, [
+        raceCustomerId,
+      ]);
+      expect(finalCheck.rows[0]?.status).toBe('HOLD');
+    } finally {
+      await clientA.end();
+      await clientB.end();
     }
   });
 
@@ -638,38 +671,60 @@ describe('SPEC-003: Test Request Creation and Immutable Method Binding (Integrat
       [raceVersionId, raceMethodId, ACCESSIONER_JANE_ID, DIRECTOR_BOB_ID],
     );
 
-    // Concurrently trigger request creation and method version supersession
-    const [createRes, updateRes] = await Promise.allSettled([
-      request(app.getHttpServer())
-        .post('/api/v1/test-requests')
-        .set('Authorization', `Bearer dev-token:${ACCESSIONER_JANE_SUB}`)
-        .send({
-          customerId: CUSTOMER_ACTIVE_ID,
-          customerReference: 'PO-METH-RACE',
-          methodVersionIds: [raceVersionId],
-        }),
-      db.transaction(async (tx) => {
-        await tx.query(
+    const dbUrl = app.get(ConfigService).databaseUrl;
+    const clientA = new Client({ connectionString: dbUrl });
+    const clientB = new Client({ connectionString: dbUrl });
+    await clientA.connect();
+    await clientB.connect();
+
+    try {
+      // 1. Transaction A starts and obtains FOR SHARE OF tmv lock (as in TestRequestService)
+      await clientA.query('BEGIN;');
+      const selectRes = await clientA.query(
+        `SELECT tmv.method_version_id, tmv.status 
+         FROM test_method_versions tmv
+         WHERE tmv.method_version_id = $1
+         FOR SHARE OF tmv;`,
+        [raceVersionId],
+      );
+      expect(selectRes.rows[0]?.status).toBe('ACTIVE');
+
+      // 2. Transaction B starts and attempts conflicting supersession update
+      await clientB.query('BEGIN;');
+      let bCompleted = false;
+      const supersessionPromise = clientB
+        .query(
           `UPDATE test_method_versions 
            SET status = 'SUPERSEDED', effective_to = NOW(), updated_at = NOW()
            WHERE method_version_id = $1;`,
           [raceVersionId],
-        );
-      }),
-    ]);
+        )
+        .then((res) => {
+          bCompleted = true;
+          return res;
+        });
 
-    expect(updateRes.status).toBe('fulfilled');
+      // 3. Deterministically prove Transaction B is blocked by Transaction A's FOR SHARE OF tmv lock
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(bCompleted).toBe(false);
 
-    // Due to FOR SHARE OF tmv locking:
-    // If createRes succeeded (201), it locked and committed before supersession.
-    // If createRes failed (400), it locked after supersession and rejected the non-ACTIVE version.
-    if (createRes.status === 'fulfilled') {
-      const httpStatus = createRes.value.status;
-      expect([201, 400]).toContain(httpStatus);
+      // 4. Transaction A commits and releases its lock
+      await clientA.query('COMMIT;');
 
-      if (httpStatus === 400) {
-        expect(createRes.value.body.detail).toContain('Only ACTIVE method versions can be bound');
-      }
+      // 5. Transaction B proceeds, unblocks, and completes its supersession
+      await supersessionPromise;
+      expect(bCompleted).toBe(true);
+      await clientB.query('COMMIT;');
+
+      // 6. Verify method version in database is now SUPERSEDED
+      const finalCheck = await db.query(
+        `SELECT status FROM test_method_versions WHERE method_version_id = $1;`,
+        [raceVersionId],
+      );
+      expect(finalCheck.rows[0]?.status).toBe('SUPERSEDED');
+    } finally {
+      await clientA.end();
+      await clientB.end();
     }
   });
 

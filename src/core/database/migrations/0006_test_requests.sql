@@ -32,13 +32,11 @@ CREATE TABLE IF NOT EXISTS test_requests (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT uq_test_requests_lab_number UNIQUE (laboratory_id, request_number),
     CONSTRAINT chk_test_requests_number_nonempty CHECK (length(trim(request_number)) > 0),
-    CONSTRAINT chk_test_requests_status CHECK (status IN ('SUBMITTED', 'ACCEPTED', 'CANCELLED')),
+    CONSTRAINT chk_test_requests_status CHECK (status IN ('SUBMITTED', 'CANCELLED')),
     CONSTRAINT chk_test_requests_cancellation_consistency CHECK (
         (status = 'SUBMITTED' AND cancellation_reason IS NULL AND cancelled_at IS NULL)
         OR
         (status = 'CANCELLED' AND cancellation_reason IS NOT NULL AND length(trim(cancellation_reason)) > 0 AND cancelled_at IS NOT NULL)
-        OR
-        (status = 'ACCEPTED' AND cancellation_reason IS NULL AND cancelled_at IS NULL)
     )
 );
 
@@ -118,7 +116,7 @@ BEGIN
 
         -- Status transitions from SUBMITTED
         IF OLD.status = 'SUBMITTED' THEN
-            IF NEW.status NOT IN ('SUBMITTED', 'CANCELLED', 'ACCEPTED') THEN
+            IF NEW.status NOT IN ('SUBMITTED', 'CANCELLED') THEN
                 RAISE EXCEPTION 'Invalid status transition from SUBMITTED to %', NEW.status
                     USING ERRCODE = '23514';
             END IF;

@@ -50,6 +50,7 @@ describe('MigratorService Integration (Real PostgreSQL)', () => {
     expect(applied).toContain('0003_audit_ledger.sql');
     expect(applied).toContain('0004_customer_and_contact.sql');
     expect(applied).toContain('0005_catalog_and_methods.sql');
+    expect(applied).toContain('0006_test_requests.sql');
 
     // Verify schema_migrations table records
     const migrationRecords = await dbService.query(

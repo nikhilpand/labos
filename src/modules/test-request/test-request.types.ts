@@ -1,4 +1,4 @@
-export type TestRequestStatus = 'SUBMITTED' | 'ACCEPTED' | 'CANCELLED';
+export type TestRequestStatus = 'SUBMITTED' | 'CANCELLED';
 
 export interface TestRequestEntity {
   testRequestId: string;

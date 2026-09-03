@@ -2,16 +2,25 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { DatabaseService } from '@/core/database/database.service';
 import { MigratorService } from '@/core/database/migrator.service';
 import { ConfigService } from '@/core/config/config.service';
-import { startTestDatabase, stopTestDatabase } from '../helpers/test-db';
+import { Client } from 'pg';
 import path from 'path';
 
 describe('MigratorService Integration (Real PostgreSQL)', () => {
   let dbService: DatabaseService;
   let migrator: MigratorService;
   let configService: ConfigService;
+  const MIGRATION_TEST_DB = 'labos_migration_test_db';
 
   beforeAll(async () => {
-    const dbUrl = await startTestDatabase();
+    const adminClient = new Client({
+      connectionString: 'postgresql://postgres:testpassword@127.0.0.1:54391/postgres',
+    });
+    await adminClient.connect();
+    await adminClient.query(`DROP DATABASE IF EXISTS ${MIGRATION_TEST_DB};`);
+    await adminClient.query(`CREATE DATABASE ${MIGRATION_TEST_DB};`);
+    await adminClient.end();
+
+    const dbUrl = `postgresql://postgres:testpassword@127.0.0.1:54391/${MIGRATION_TEST_DB}`;
     configService = new ConfigService({
       DATABASE_URL: dbUrl,
       NODE_ENV: 'test',
@@ -24,7 +33,12 @@ describe('MigratorService Integration (Real PostgreSQL)', () => {
     if (dbService) {
       await dbService.onApplicationShutdown();
     }
-    await stopTestDatabase();
+    const adminClient = new Client({
+      connectionString: 'postgresql://postgres:testpassword@127.0.0.1:54391/postgres',
+    });
+    await adminClient.connect();
+    await adminClient.query(`DROP DATABASE IF EXISTS ${MIGRATION_TEST_DB};`);
+    await adminClient.end();
   });
 
   it('should successfully apply versioned migrations in strict transactions', async () => {
@@ -32,6 +46,8 @@ describe('MigratorService Integration (Real PostgreSQL)', () => {
     const applied = await migrator.migrate(migrationsDir);
 
     expect(applied).toContain('0001_init_infrastructure.sql');
+    expect(applied).toContain('0002_laboratory_and_auth_context.sql');
+    expect(applied).toContain('0003_audit_ledger.sql');
 
     // Verify schema_migrations table records
     const migrationRecords = await dbService.query(
@@ -57,3 +73,4 @@ describe('MigratorService Integration (Real PostgreSQL)', () => {
     expect(appliedAgain).toHaveLength(0);
   });
 });
+

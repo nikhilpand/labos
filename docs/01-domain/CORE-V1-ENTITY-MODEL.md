@@ -132,35 +132,59 @@ This document defines the formal entity specifications for **LabOS Core V1**. It
 
 ---
 
-## 9. Test Method (SOP)
+## 9. Test Method (SOP Parent Header)
 * **Canonical Name:** `Test Method`
-* **Purpose:** The validated scientific standard operating procedure (e.g., `EPA 200.8`).
+* **Purpose:** The stable scientific identity for a standard operating procedure (e.g., `EPA 200.8`, `Standard Methods 4500-NO3 F`).
 * **Identifier:** `test_method_id` (UUIDv7)
 * **Owner:** `Laboratory Catalog`.
-* **Key Fields:** `code` (e.g., `EPA_200_8`), `name`, `version`, `accreditation_status` (`ACCREDITED`, `NON_ACCREDITED`), `regulatory_agency` (e.g., EPA, ISO, ASTM), `status`.
-* **Required Fields:** `code`, `name`, `version`, `accreditation_status`, `status`.
-* **Relationships:** Contains many `Test Parameters`. Applied to `Tests`.
-* **Lifecycle:** `Draft` -> `Active` -> `Superseded` -> `Retired`.
-* **Mutability:** Published methods are immutable. Revisions increment `version`.
-* **Versioning:** Versioned catalog entity.
-* **Deletion Policy:** Cannot be deleted if historical tests reference it.
-* **Audit Requirements:** Logged as `TEST_METHOD_REVISED`.
+* **Key Fields:** `laboratory_id`, `code` (e.g., `EPA_200_8`), `name`, `regulatory_agency` (e.g., `EPA`, `ISO`, `ASTM`, `STANDARD_METHODS`), `description`.
+* **Required Fields:** `laboratory_id`, `code`, `name`.
+* **Relationships:** Parent to one or more `Test Method Versions` (1:N).
+* **Deletion Policy:** Hard deletion forbidden if historical versions or tests reference it.
+* **Audit Requirements:** Logged as `TEST_METHOD_CREATED`.
 
 ---
 
-## 10. Test Parameter (Analyte)
-* **Canonical Name:** `Test Parameter`
-* **Purpose:** A specific measured substance (e.g., `Lead`, `Nitrate`, `pH`).
-* **Identifier:** `test_parameter_id` (UUIDv7)
+## 9a. Test Method Version (Point-in-Time Immutable Scientific Revision)
+* **Canonical Name:** `Test Method Version`
+* **Purpose:** The immutable scientific definition governing actual laboratory test runs, limits, and calculations.
+* **Identifier:** `method_version_id` (UUIDv7)
 * **Owner:** `Test Method`.
-* **Key Fields:** `test_method_id`, `name`, `chemical_formula`, `cas_number`, `default_unit_id`, `default_loq` (Decimal).
-* **Required Fields:** `test_method_id`, `name`, `default_unit_id`, `default_loq`.
-* **Relationships:** Belongs to `Test Method`. Target of `Results`.
-* **Lifecycle:** `Active` -> `Deprecated`.
-* **Mutability:** Immutable once active.
-* **Versioning:** Catalog entity.
-* **Deletion Policy:** Soft-deactivate only.
-* **Audit Requirements:** Logged as `TEST_PARAMETER_UPDATED`.
+* **Key Fields:** `test_method_id`, `version_number` (integer), `revision_label` (e.g., `Rev 5.4`), `status` (`DRAFT`, `ACTIVE`, `SUPERSEDED`, `RETIRED`), `accreditation_status` (`ACCREDITED`, `NON_ACCREDITED`), `sop_reference`, `effective_from`, `effective_to`, `created_by_user_id`, `approved_by_user_id`.
+* **Required Fields:** `test_method_id`, `version_number`, `revision_label`, `status`, `accreditation_status`, `created_by_user_id`.
+* **Relationships:** Belongs to `Test Method`. Contains many `Method Version Parameters` (1:N). Associated with compatible `Sample Types` (N:M). Directly referenced by future `Tests` (N:1).
+* **Lifecycle:** `DRAFT` -> `ACTIVE` -> `SUPERSEDED` (or `RETIRED`).
+* **Mutability:** **Permanently frozen once ACTIVE.** Revisions require creating a new `DRAFT` version (`vN+1`).
+* **Deletion Policy:** Deletion prohibited once `ACTIVE`.
+* **Audit Requirements:** Logged as `TEST_METHOD_VERSION_DRAFTED`, `TEST_METHOD_VERSION_ACTIVATED`, `TEST_METHOD_VERSION_SUPERSEDED`, `TEST_METHOD_VERSION_RETIRED`.
+
+---
+
+## 10. Test Parameter (Standalone Analyte / Observable)
+* **Canonical Name:** `Test Parameter`
+* **Purpose:** A distinct scientific analyte or observable parameter (e.g., `Lead`, `Arsenic`, `Nitrate`, `pH`). Independent of any single method.
+* **Identifier:** `parameter_id` (UUIDv7)
+* **Owner:** `Laboratory Catalog`.
+* **Key Fields:** `laboratory_id`, `code` (e.g., `LEAD_TOTAL`), `name`, `chemical_formula`, `cas_number`, `status` (`ACTIVE`, `INACTIVE`).
+* **Required Fields:** `laboratory_id`, `code`, `name`, `status`.
+* **Relationships:** Bound to multiple `Test Method Versions` via `Method Version Parameters`.
+* **Lifecycle:** `ACTIVE` -> `INACTIVE`.
+* **Mutability:** Master reference data.
+* **Deletion Policy:** Soft-deactivate only. Hard deletion forbidden if configured in any method version.
+* **Audit Requirements:** Logged as `PARAMETER_CREATED`.
+
+---
+
+## 10a. Method Version Parameter (Analyte Limits & Unit Configuration)
+* **Canonical Name:** `Method Version Parameter`
+* **Purpose:** The method-specific configuration defining detection limit (LOD/MDL), reporting limit (LOQ/RL), and unit of measurement for an analyte within a specific method revision.
+* **Identifier:** `method_version_parameter_id` (UUIDv7)
+* **Owner:** `Test Method Version`.
+* **Key Fields:** `method_version_id`, `parameter_id`, `unit_id`, `detection_limit` (Decimal), `reporting_limit` (Decimal), `decimal_precision`, `is_mandatory`.
+* **Required Fields:** `method_version_id`, `parameter_id`, `unit_id`, `detection_limit`, `reporting_limit`.
+* **Invariants:** `reporting_limit >= detection_limit`, both limits strictly positive exact decimals.
+* **Lifecycle:** Editable only while parent `Test Method Version` is `DRAFT`. Frozen when parent is `ACTIVE`.
+* **Audit Requirements:** Logged as `TEST_METHOD_VERSION_CONFIGURED`.
 
 ---
 

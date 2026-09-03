@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-**LabOS** is an open, high-integrity Laboratory Operating System designed to manage scientific operations—from sample accessioning to final certified reporting—with uncompromising data integrity, complete auditability, and regulatory readiness.
+**LabOS** is an open, high-integrity Laboratory Operating System designed to manage scientific operations—from sample accessioning to final authorized reporting (Certificate of Analysis)—with uncompromising data integrity, complete auditability, and regulatory readiness.
 
 This document synthesizes the foundational architecture decisions recorded in [docs/07-decisions/](file:///c:/Users/nikhil/Desktop/projects/labos/docs/07-decisions/) into a unified system blueprint.
 

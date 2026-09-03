@@ -70,7 +70,7 @@ Rather, **the explicit design goal is tamper-evidence and independent verifiabil
 ### Positive
 - Fully auditable lifecycle for all samples, batches, and scientific measurements.
 - Mathematical proof of history continuity.
-- Complete regulatory readiness for ISO 17025 and 21 CFR Part 11.
+- Architecture designed to facilitate regulatory readiness for ISO/IEC 17025 and 21 CFR Part 11.
 
 ### Negative
 - Higher database storage footprint over time (mitigated by table partitioning and cold storage archival strategies).

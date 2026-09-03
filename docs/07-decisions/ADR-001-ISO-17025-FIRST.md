@@ -43,7 +43,7 @@ The architecture and core data model must remain extensible enough to support ot
   - Quality Control (QC) evaluations (blanks, calibration standards, matrix spikes, duplicates)
   - Mathematical result calculations and unit conversions
   - Scientific verification and authorized sign-off
-  - Generation of a certified Certificate of Analysis (CoA)
+  - Generation of an authorized Certificate of Analysis (CoA)
 - **Zero Human PHI Risk on Day 1:** Testing water, soil, or food allows the system to be developed and tested with realistic synthetic data without the legal and compliance risks associated with human patient medical records.
 - **Direct Foundation for Other Standards:** ISO 15189 (the international medical laboratory standard) was derived directly from ISO/IEC 17025. Building a rock-solid ISO 17025 engine creates the exact scientific spine required for clinical and pharmaceutical applications later.
 
@@ -76,4 +76,4 @@ The architecture and core data model must remain extensible enough to support ot
 
 This decision may be reconsidered if:
 1. A strategic institutional partnership or funding source requires immediate deployment in a clinical diagnostic or pharmaceutical environment.
-2. The core ISO 17025 pipeline is fully implemented and certified, triggering a formal Phase transition to ISO 15189 (Clinical Diagnostics).
+2. The core ISO 17025-aligned pipeline is fully implemented and verified against compliance specifications, triggering a formal Phase transition to ISO 15189 (Clinical Diagnostics).

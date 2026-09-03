@@ -10,7 +10,7 @@ This document serves as the permanent architectural compass, engineering ruleboo
 
 - **Initial Domain Target:** **ISO/IEC 17025 analytical and testing laboratories** (specifically chemical, environmental, and food safety testing).
 - **Long-Term Extensibility:** The core architecture and data model must remain extensible to support medical/clinical diagnostics (ISO 15189 / CLIA) and pharmaceutical biotechnology (GxP / 21 CFR Part 11) in future phases, without implementing their domain-specific features prematurely (*Ref: [ADR-001](file:///c:/Users/nikhil/Desktop/projects/labos/docs/07-decisions/ADR-001-ISO-17025-FIRST.md)*).
-- **Core Purpose:** Orchestrate end-to-end laboratory operations—from sample intake to certified scientific reporting—with uncompromising standards for data integrity, chain of custody, auditability, and regulatory readiness.
+- **Core Purpose:** Orchestrate end-to-end laboratory operations—from sample intake to authorized scientific reporting—with uncompromising standards for data integrity, chain of custody, auditability, and regulatory readiness.
 
 ---
 
@@ -27,11 +27,11 @@ The long-term goal of LabOS is to provide an end-to-end, unified platform for mo
 
 ## 3. Current Project Scope
 
-The project is intentionally in **Phase 0: Documentation, Domain Modeling, and Architecture Blueprinting**.
+The project has transitioned through Phase 1 (Platform Foundation) and Phase 2A (Platform Kernel) and is currently in **Phase 2: Core V1 Vertical Slice Implementation** (with SPEC-001 Customer Registration complete and verified).
 
-- **No Application Code Yet:** Do not write frontend or backend application code during this phase.
-- **No Premature Frameworks:** Do not generate web app boilerplate, database connection runtimes, Docker containers, or microservice configurations.
-- **Documentation & Specifications First:** All effort is currently dedicated to modeling the domain, defining data contracts, mapping workflows, establishing compliance standards, and cataloging engineering decisions under `docs/` and `specs/`.
+- **Specification-Driven Delivery:** Features are implemented strictly according to approved vertical slice specifications under `specs/` (e.g. SPEC-001 completed, future specs queued in `specs/backlog/`).
+- **No Premature Frameworks or Microservices:** Avoid out-of-scope scaffolding, Docker configurations, or microservice splits. Core laboratory business logic remains inside the modular monolith.
+- **Documentation & Invariants First:** Domain modeling, database constraints, immutable audit trails, and data contracts under `docs/` and `specs/` govern all implementation steps.
 
 ---
 
@@ -203,7 +203,7 @@ A task or feature in LabOS is considered **Done** only when:
 
 ## 15. Current Project Phase
 
-- **Current Status:** **Phase 0 — Documentation & Architecture Blueprinting**
+- **Current Status:** **Phase 2 — Core V1 Implementation (SPEC-001 Complete & Verified)**
 - **Approved Architecture Decision Records:**
   - [ADR-001: Primary First Laboratory Domain — ISO/IEC 17025 Analytical & Testing Laboratories](file:///c:/Users/nikhil/Desktop/projects/labos/docs/07-decisions/ADR-001-ISO-17025-FIRST.md)
   - [ADR-002: Backend Technology Stack & Scientific Calculation Rigor — TypeScript with NestJS](file:///c:/Users/nikhil/Desktop/projects/labos/docs/07-decisions/ADR-002-TYPESCRIPT-NESTJS.md)
@@ -211,9 +211,9 @@ A task or feature in LabOS is considered **Done** only when:
   - [ADR-004: Core Architectural Strategy — Modular Monolith as Permanent Default](file:///c:/Users/nikhil/Desktop/projects/labos/docs/07-decisions/ADR-004-MODULAR-MONOLITH.md)
   - [ADR-005: Audit Trail & Historical Data Immutability Architecture](file:///c:/Users/nikhil/Desktop/projects/labos/docs/07-decisions/ADR-005-AUDIT-INTEGRITY.md)
   - [ADR-006: Identity, Authentication & Domain Authorization Architecture](file:///c:/Users/nikhil/Desktop/projects/labos/docs/07-decisions/ADR-006-OIDC-IDENTITY.md)
+- **Completed Vertical Slices:**
+  - [SPEC-001: Customer Registration with Primary Contact & Audit Trail](file:///c:/Users/nikhil/Desktop/projects/labos/specs/completed/001-first-vertical-slice.md)
 - **Immediate Focus:** 
-  1. Authoring domain specifications in `docs/01-domain/`.
-  2. Mapping regulatory and compliance requirements in `docs/04-compliance/`.
-  3. Designing the modular monolithic architecture in `docs/02-architecture/`.
-  4. Establishing workflow contracts in `docs/05-workflows/`.
-- **Constraint Reminder:** **Do not write application code or scaffold frontend/backend implementation until this phase is formally concluded and approved.**
+  1. Maintain verification gates across all platform layers.
+  2. Scope and specify next vertical slices (Sample Intake & Accessioning).
+- **Constraint Reminder:** Do not begin next vertical slice implementation until specification is approved.

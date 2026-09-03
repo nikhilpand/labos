@@ -91,7 +91,7 @@ The following capabilities are deliberately excluded from Core V1 to keep the in
 
 ## 5. The Core V1 End-to-End Workflow
 
-The validated, compliant single-sample analytical workflow for Core V1:
+The single-sample analytical workflow designed for Core V1 (aligned with ISO/IEC 17025 principles):
 
 ```text
 [1. Customer Creation]

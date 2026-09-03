@@ -1,9 +1,11 @@
 # Specification 001: Customer Registration with Primary Contact & Audit Trail
 
 - **Specification ID:** `SPEC-001`
-- **Status:** Active (First Vertical Slice)
+- **Status:** Completed
 - **Target Release:** Core V1 Milestone 1
 - **Domain Focus:** Commercial Foundation & Architecture Validation
+- **Completed Date:** 2026-09-03
+- **Verification Evidence:** 34 unit tests & 32 real PostgreSQL integration tests passing
 
 ---
 
@@ -11,7 +13,7 @@
 
 > **As an authorized** Laboratory Registrar / Accessioner,  
 > **I want to** register a new commercial Customer account along with their designated primary Contact in our Laboratory,  
-> **So that** the laboratory can establish an auditable commercial relationship and accept incoming sample test requests under an active, accredited account.
+> **So that** the laboratory can establish an auditable commercial relationship and accept incoming sample test requests under an active customer account.
 
 ---
 

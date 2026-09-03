@@ -86,17 +86,25 @@ This document defines the formal entity specifications for **LabOS Core V1**. It
 
 ## 6. Test Request (Work Order / Chain of Custody)
 * **Canonical Name:** `Test Request`
-* **Purpose:** The commercial order grouping submitted samples and requested analytical tests.
+* **Purpose:** The commercial order grouping requested analytical test methods and linking to physical samples.
 * **Identifier:** `test_request_id` (UUIDv7)
 * **Owner:** `Customer`.
-* **Key Fields:** `request_number` (human-readable e.g., `TR-2026-00412`), `customer_id`, `contact_id`, `customer_po_number`, `order_date`, `turnaround_time_days`, `status`, `special_instructions`.
-* **Required Fields:** `request_number`, `customer_id`, `order_date`, `status`.
-* **Relationships:** Belongs to `Customer`. Has many `Samples`. Originates `Reports`.
-* **Lifecycle:** `DRAFT` -> `SUBMITTED` -> `ACCEPTED` -> `IN_PROGRESS` -> `COMPLETED` -> `CANCELLED`.
-* **Mutability:** Commercial terms locked once accepted; status transitions auditable.
-* **Versioning:** None.
-* **Deletion Policy:** Soft-cancellation only (`CANCELLED` with mandatory reason).
-* **Audit Requirements:** Logged as `TEST_REQUEST_CREATED`, `TEST_REQUEST_ACCEPTED`, `TEST_REQUEST_CANCELLED`.
+* **Key Fields:** `request_number` (human-readable e.g., `TR-2026-000001`), `laboratory_id`, `customer_id`, `customer_reference` (e.g. client PO/work order), `special_instructions`, `status`, `requested_at`, `cancellation_reason`, `cancelled_at`, `created_by_user_id`.
+* **Required Fields:** `test_request_id`, `laboratory_id`, `customer_id`, `request_number`, `status`, `requested_at`, `created_by_user_id`.
+* **Relationships:** Belongs to `Customer`. Has many `Test Request Items` (which bind permanently to `Test Method Version`). Originates `Samples` (SPEC-004) and `Reports`.
+* **Lifecycle:** `SUBMITTED` -> `CANCELLED` (Terminal) (and future `ACCEPTED` upon physical sample accessioning in SPEC-004).
+* **Mutability:** Core identification fields permanently immutable; cancellation transitions with mandatory reason.
+* **Deletion Policy:** Prohibited via database trigger (`trg_test_requests_immutability`). Soft-cancellation only.
+* **Audit Requirements:** Logged as `TEST_REQUEST_CREATED`, `TEST_REQUEST_CANCELLED`.
+
+### 6a. Test Request Item
+* **Canonical Name:** `Test Request Item`
+* **Purpose:** Permanent, immutable binding between a Test Request and an exact scientific `test_method_version`.
+* **Identifier:** `test_request_item_id` (UUIDv7)
+* **Owner:** `Test Request`.
+* **Key Fields:** `test_request_id`, `method_version_id`, `created_at`.
+* **Scientific Invariant:** Selected method version must be in `ACTIVE` status at creation time. The binding remains valid forever even if the referenced method version is later `SUPERSEDED` or `RETIRED`.
+* **Deletion Policy:** Prohibited via database trigger (`trg_test_request_item_immutability`). Append-only.
 
 ---
 
